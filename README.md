@@ -1,4 +1,4 @@
-# DiGi API
+# DiGi API EXAMPLES
 
 This repo has running code which you can execute to help you understand how to interact with the DiGi API.
 
