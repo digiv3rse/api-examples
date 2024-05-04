@@ -4,8 +4,6 @@ This repo has running code which you can execute to help you understand how to i
 
 DiGi API is beta at the moment and can change without warning!
 
-Full documentation is available at [https://docs.lens.dev/docs/introduction](https://docs.lens.dev/docs/introduction).
-
 ## Setup
 
 for the scripts to run you need to create a `.env` (or copy the template `cp .env.template .env`) file with these variables:
