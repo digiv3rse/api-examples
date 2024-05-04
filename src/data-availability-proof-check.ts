@@ -2,7 +2,7 @@ import { checkDAProof, Environment, EthereumNode } from '@digiv3rse/data-availab
 import { RPC_URL } from './config';
 
 const ethereumNode: EthereumNode = {
-  environment: Environment.MUMBAI,
+  environment: Environment.SEPOLIA,
   nodeUrl: RPC_URL,
 };
 
