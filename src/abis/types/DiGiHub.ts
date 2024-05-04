@@ -54,15 +54,33 @@ export interface ContractCallOverrides {
    */
   gasLimit?: number;
 }
-export type DiGiHubEvents = 'Approval' | 'ApprovalForAll' | 'Transfer';
+export type DiGiHubEvents =
+  | 'Approval'
+  | 'ApprovalForAll'
+  | 'BatchMetadataUpdate'
+  | 'CollectNFTTransferred'
+  | 'DiGiUpgradeVersion'
+  | 'TokenGuardianStateChanged'
+  | 'Transfer'
+  | 'TreasuryFeeSet'
+  | 'TreasurySet'
+  | 'Unfollowed';
 export interface DiGiHubEventsContext {
   Approval(...parameters: any): EventFilter;
   ApprovalForAll(...parameters: any): EventFilter;
+  BatchMetadataUpdate(...parameters: any): EventFilter;
+  CollectNFTTransferred(...parameters: any): EventFilter;
+  DiGiUpgradeVersion(...parameters: any): EventFilter;
+  TokenGuardianStateChanged(...parameters: any): EventFilter;
   Transfer(...parameters: any): EventFilter;
+  TreasuryFeeSet(...parameters: any): EventFilter;
+  TreasurySet(...parameters: any): EventFilter;
+  Unfollowed(...parameters: any): EventFilter;
 }
 export type DiGiHubMethodNames =
   | 'new'
   | 'DANGER__disableTokenGuardian'
+  | 'TOKEN_GUARDIAN_COOLDOWN'
   | 'act'
   | 'actWithSig'
   | 'approve'
@@ -75,42 +93,52 @@ export type DiGiHubMethodNames =
   | 'changeDelegatedExecutorsConfig'
   | 'changeDelegatedExecutorsConfig'
   | 'changeDelegatedExecutorsConfigWithSig'
-  | 'collect'
-  | 'collectWithSig'
+  | 'collectLegacy'
+  | 'collectLegacyWithSig'
   | 'comment'
   | 'commentWithSig'
   | 'createProfile'
   | 'emitCollectNFTTransferEvent'
   | 'emitUnfollowedEvent'
+  | 'emitVersion'
   | 'enableTokenGuardian'
   | 'exists'
   | 'follow'
   | 'followWithSig'
-  | 'getActionModuleById'
-  | 'getActionModuleWhitelistData'
   | 'getApproved'
-  | 'getCollectNFTImpl'
   | 'getContentURI'
   | 'getDelegatedExecutorsConfigNumber'
   | 'getDelegatedExecutorsMaxConfigNumberSet'
   | 'getDelegatedExecutorsPrevConfigNumber'
   | 'getDomainSeparator'
+  | 'getFollowModule'
   | 'getFollowNFTImpl'
+  | 'getFollowTokenURIContract'
+  | 'getGitCommit'
   | 'getGovernance'
+  | 'getLegacyCollectNFTImpl'
+  | 'getModuleRegistry'
   | 'getProfile'
   | 'getProfileIdByHandleHash'
+  | 'getProfileTokenURIContract'
   | 'getPublication'
   | 'getPublicationType'
   | 'getState'
   | 'getTokenGuardianDisablingTimestamp'
+  | 'getTreasury'
+  | 'getTreasuryData'
+  | 'getTreasuryFee'
+  | 'getVersion'
+  | 'incrementNonce'
+  | 'initialize'
+  | 'isActionModuleEnabledInPublication'
   | 'isApprovedForAll'
   | 'isBlocked'
   | 'isDelegatedExecutorApproved'
   | 'isDelegatedExecutorApproved'
-  | 'isFollowModuleWhitelisted'
+  | 'isFollowing'
   | 'isFollowing'
   | 'isProfileCreatorWhitelisted'
-  | 'isReferenceModuleWhitelisted'
   | 'mintTimestampOf'
   | 'mirror'
   | 'mirrorWithSig'
@@ -130,12 +158,16 @@ export type DiGiHubMethodNames =
   | 'setEmergencyAdmin'
   | 'setFollowModule'
   | 'setFollowModuleWithSig'
+  | 'setFollowTokenURIContract'
   | 'setGovernance'
   | 'setMigrationAdmins'
   | 'setProfileMetadataURI'
   | 'setProfileMetadataURIWithSig'
+  | 'setProfileTokenURIContract'
   | 'setRoyalty'
   | 'setState'
+  | 'setTreasury'
+  | 'setTreasuryFee'
   | 'supportsInterface'
   | 'symbol'
   | 'tokenDataOf'
@@ -144,17 +176,13 @@ export type DiGiHubMethodNames =
   | 'transferFrom'
   | 'unfollow'
   | 'unfollowWithSig'
-  | 'whitelistActionModule'
-  | 'whitelistFollowModule'
-  | 'whitelistProfileCreator'
-  | 'whitelistReferenceModule';
+  | 'whitelistProfileCreator';
 export interface MigrationParamsRequest {
   digiHandlesAddress: string;
   tokenHandleRegistryAddress: string;
   legacyFeeFollowModule: string;
   legacyProfileFollowModule: string;
   newFeeFollowModule: string;
-  migrationAdmin: string;
 }
 export interface ApprovalEventEmittedResponse {
   owner: string;
@@ -166,10 +194,50 @@ export interface ApprovalForAllEventEmittedResponse {
   operator: string;
   approved: boolean;
 }
+export interface BatchMetadataUpdateEventEmittedResponse {
+  fromTokenId: BigNumberish;
+  toTokenId: BigNumberish;
+}
+export interface CollectNFTTransferredEventEmittedResponse {
+  profileId: BigNumberish;
+  pubId: BigNumberish;
+  collectNFTId: BigNumberish;
+  from: string;
+  to: string;
+  timestamp: BigNumberish;
+}
+export interface DiGiUpgradeVersionEventEmittedResponse {
+  implementation: string;
+  version: string;
+  gitCommit: Arrayish;
+  timestamp: BigNumberish;
+}
+export interface TokenGuardianStateChangedEventEmittedResponse {
+  wallet: string;
+  enabled: boolean;
+  tokenGuardianDisablingTimestamp: BigNumberish;
+  timestamp: BigNumberish;
+}
 export interface TransferEventEmittedResponse {
   from: string;
   to: string;
   tokenId: BigNumberish;
+}
+export interface TreasuryFeeSetEventEmittedResponse {
+  prevTreasuryFee: BigNumberish;
+  newTreasuryFee: BigNumberish;
+  timestamp: BigNumberish;
+}
+export interface TreasurySetEventEmittedResponse {
+  prevTreasury: string;
+  newTreasury: string;
+  timestamp: BigNumberish;
+}
+export interface UnfollowedEventEmittedResponse {
+  unfollowerProfileId: BigNumberish;
+  idOfProfileUnfollowed: BigNumberish;
+  transactionExecutor: string;
+  timestamp: BigNumberish;
 }
 export interface PublicationActionParamsRequest {
   publicationActedProfileId: BigNumberish;
@@ -213,12 +281,6 @@ export interface CreateProfileParamsRequest {
   followModule: string;
   followModuleInitData: Arrayish;
 }
-export interface ActionmodulewhitelistdataResponse {
-  id: BigNumber;
-  0: BigNumber;
-  isWhitelisted: boolean;
-  1: boolean;
-}
 export interface ProfileResponse {
   pubCount: BigNumber;
   0: BigNumber;
@@ -235,7 +297,7 @@ export interface ProfileResponse {
   metadataURI: string;
   6: string;
 }
-export interface PublicationResponse {
+export interface PublicationmemoryResponse {
   pointedProfileId: BigNumber;
   0: BigNumber;
   pointedPubId: BigNumber;
@@ -254,8 +316,13 @@ export interface PublicationResponse {
   7: BigNumber;
   rootPubId: BigNumber;
   8: BigNumber;
-  enabledActionModulesBitmap: BigNumber;
-  9: BigNumber;
+}
+export interface GetTreasuryDataResponse {
+  result0: string;
+  0: string;
+  result1: number;
+  1: number;
+  length: 2;
 }
 export interface MirrorParamsRequest {
   profileId: BigNumberish;
@@ -306,16 +373,16 @@ export interface DiGiHub {
    * Constant: false
    * StateMutability: nonpayable
    * Type: constructor
-   * @param moduleGlobals Type: address, Indexed: false
    * @param followNFTImpl Type: address, Indexed: false
    * @param collectNFTImpl Type: address, Indexed: false
+   * @param moduleRegistry Type: address, Indexed: false
    * @param tokenGuardianCooldown Type: uint256, Indexed: false
    * @param migrationParams Type: tuple, Indexed: false
    */
   'new'(
-    moduleGlobals: string,
     followNFTImpl: string,
     collectNFTImpl: string,
+    moduleRegistry: string,
     tokenGuardianCooldown: BigNumberish,
     migrationParams: MigrationParamsRequest,
     overrides?: ContractTransactionOverrides
@@ -329,6 +396,13 @@ export interface DiGiHub {
   DANGER__disableTokenGuardian(
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  TOKEN_GUARDIAN_COOLDOWN(overrides?: ContractCallOverrides): Promise<BigNumber>;
   /**
    * Payable: false
    * Constant: false
@@ -499,7 +573,7 @@ export interface DiGiHub {
    * Type: function
    * @param collectParams Type: tuple, Indexed: false
    */
-  collect(
+  collectLegacy(
     collectParams: CollectParamsRequest,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>;
@@ -511,7 +585,7 @@ export interface DiGiHub {
    * @param collectParams Type: tuple, Indexed: false
    * @param signature Type: tuple, Indexed: false
    */
-  collectWithSig(
+  collectLegacyWithSig(
     collectParams: CollectParamsRequest,
     signature: SignatureRequest,
     overrides?: ContractTransactionOverrides
@@ -591,6 +665,13 @@ export interface DiGiHub {
    * StateMutability: nonpayable
    * Type: function
    */
+  emitVersion(overrides?: ContractTransactionOverrides): Promise<ContractTransaction>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   */
   enableTokenGuardian(overrides?: ContractTransactionOverrides): Promise<ContractTransaction>;
   /**
    * Payable: false
@@ -641,35 +722,9 @@ export interface DiGiHub {
    * Constant: true
    * StateMutability: view
    * Type: function
-   * @param id Type: uint256, Indexed: false
-   */
-  getActionModuleById(id: BigNumberish, overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   * @param actionModule Type: address, Indexed: false
-   */
-  getActionModuleWhitelistData(
-    actionModule: string,
-    overrides?: ContractCallOverrides
-  ): Promise<ActionmodulewhitelistdataResponse>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
    * @param tokenId Type: uint256, Indexed: false
    */
   getApproved(tokenId: BigNumberish, overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  getCollectNFTImpl(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: true
@@ -728,6 +783,14 @@ export interface DiGiHub {
    * Constant: true
    * StateMutability: view
    * Type: function
+   * @param profileId Type: uint256, Indexed: false
+   */
+  getFollowModule(profileId: BigNumberish, overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
    */
   getFollowNFTImpl(overrides?: ContractCallOverrides): Promise<string>;
   /**
@@ -736,7 +799,35 @@ export interface DiGiHub {
    * StateMutability: view
    * Type: function
    */
+  getFollowTokenURIContract(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: pure
+   * Type: function
+   */
+  getGitCommit(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
   getGovernance(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getLegacyCollectNFTImpl(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getModuleRegistry(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: true
@@ -761,6 +852,13 @@ export interface DiGiHub {
    * Constant: true
    * StateMutability: view
    * Type: function
+   */
+  getProfileTokenURIContract(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: pure
+   * Type: function
    * @param profileId Type: uint256, Indexed: false
    * @param pubId Type: uint256, Indexed: false
    */
@@ -768,7 +866,7 @@ export interface DiGiHub {
     profileId: BigNumberish,
     pubId: BigNumberish,
     overrides?: ContractCallOverrides
-  ): Promise<PublicationResponse>;
+  ): Promise<PublicationmemoryResponse>;
   /**
    * Payable: false
    * Constant: true
@@ -800,6 +898,75 @@ export interface DiGiHub {
     wallet: string,
     overrides?: ContractCallOverrides
   ): Promise<BigNumber>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getTreasury(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getTreasuryData(overrides?: ContractCallOverrides): Promise<GetTreasuryDataResponse>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getTreasuryFee(overrides?: ContractCallOverrides): Promise<number>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: pure
+   * Type: function
+   */
+  getVersion(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param increment Type: uint8, Indexed: false
+   */
+  incrementNonce(
+    increment: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param name Type: string, Indexed: false
+   * @param symbol Type: string, Indexed: false
+   * @param newGovernance Type: address, Indexed: false
+   */
+  initialize(
+    name: string,
+    symbol: string,
+    newGovernance: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param profileId Type: uint256, Indexed: false
+   * @param pubId Type: uint256, Indexed: false
+   * @param module Type: address, Indexed: false
+   */
+  isActionModuleEnabledInPublication(
+    profileId: BigNumberish,
+    pubId: BigNumberish,
+    module: string,
+    overrides?: ContractCallOverrides
+  ): Promise<boolean>;
   /**
    * Payable: false
    * Constant: true
@@ -859,10 +1026,14 @@ export interface DiGiHub {
    * Constant: true
    * StateMutability: view
    * Type: function
-   * @param followModule Type: address, Indexed: false
+   * @param followedProfileId Type: uint256, Indexed: false
+   * @param followerAddress Type: address, Indexed: false
+   * @param parameter2 Type: uint256, Indexed: false
    */
-  isFollowModuleWhitelisted(
-    followModule: string,
+  isFollowing(
+    followedProfileId: BigNumberish,
+    followerAddress: string,
+    parameter2: BigNumberish,
     overrides?: ContractCallOverrides
   ): Promise<boolean>;
   /**
@@ -887,17 +1058,6 @@ export interface DiGiHub {
    */
   isProfileCreatorWhitelisted(
     profileCreator: string,
-    overrides?: ContractCallOverrides
-  ): Promise<boolean>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   * @param referenceModule Type: address, Indexed: false
-   */
-  isReferenceModuleWhitelisted(
-    referenceModule: string,
     overrides?: ContractCallOverrides
   ): Promise<boolean>;
   /**
@@ -1141,6 +1301,17 @@ export interface DiGiHub {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
+   * @param followTokenURIContract Type: address, Indexed: false
+   */
+  setFollowTokenURIContract(
+    followTokenURIContract: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
    * @param newGovernance Type: address, Indexed: false
    */
   setGovernance(
@@ -1193,6 +1364,17 @@ export interface DiGiHub {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
+   * @param profileTokenURIContract Type: address, Indexed: false
+   */
+  setProfileTokenURIContract(
+    profileTokenURIContract: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
    * @param royaltiesInBasisPoints Type: uint256, Indexed: false
    */
   setRoyalty(
@@ -1208,6 +1390,28 @@ export interface DiGiHub {
    */
   setState(
     newState: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param newTreasury Type: address, Indexed: false
+   */
+  setTreasury(
+    newTreasury: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param newTreasuryFee Type: uint16, Indexed: false
+   */
+  setTreasuryFee(
+    newTreasuryFee: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>;
   /**
@@ -1296,50 +1500,11 @@ export interface DiGiHub {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
-   * @param actionModule Type: address, Indexed: false
-   * @param whitelist Type: bool, Indexed: false
-   */
-  whitelistActionModule(
-    actionModule: string,
-    whitelist: boolean,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param followModule Type: address, Indexed: false
-   * @param whitelist Type: bool, Indexed: false
-   */
-  whitelistFollowModule(
-    followModule: string,
-    whitelist: boolean,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
    * @param profileCreator Type: address, Indexed: false
    * @param whitelist Type: bool, Indexed: false
    */
   whitelistProfileCreator(
     profileCreator: string,
-    whitelist: boolean,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param referenceModule Type: address, Indexed: false
-   * @param whitelist Type: bool, Indexed: false
-   */
-  whitelistReferenceModule(
-    referenceModule: string,
     whitelist: boolean,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>;

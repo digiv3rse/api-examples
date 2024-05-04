@@ -1,5 +1,11 @@
+import {
+  ContractTransaction,
+  ContractInterface,
+  BytesLike as Arrayish,
+  BigNumber,
+  BigNumberish,
+} from 'ethers';
 import { EthersContractContextV5 } from 'ethereum-abi-types-generator';
-import { BytesLike as Arrayish, BigNumber, BigNumberish, ContractTransaction } from 'ethers';
 
 export type ContractContext = EthersContractContextV5<
   DiGiTokenHandleRegistry,
@@ -48,11 +54,16 @@ export interface ContractCallOverrides {
    */
   gasLimit?: number;
 }
-export type DiGiTokenHandleRegistryEvents = undefined;
-export interface DiGiTokenHandleRegistryEventsContext {}
+export type DiGiTokenHandleRegistryEvents = 'HandleLinked' | 'HandleUnlinked' | 'NonceUpdated';
+export interface DiGiTokenHandleRegistryEventsContext {
+  HandleLinked(...parameters: any): EventFilter;
+  HandleUnlinked(...parameters: any): EventFilter;
+  NonceUpdated(...parameters: any): EventFilter;
+}
 export type DiGiTokenHandleRegistryMethodNames =
   | 'new'
   | 'getDefaultHandle'
+  | 'incrementNonce'
   | 'link'
   | 'linkWithSig'
   | 'migrationLink'
@@ -60,6 +71,31 @@ export type DiGiTokenHandleRegistryMethodNames =
   | 'resolve'
   | 'unlink'
   | 'unlinkWithSig';
+export interface HandleEventEmittedResponse {
+  id: BigNumberish;
+  collection: string;
+}
+export interface TokenEventEmittedResponse {
+  id: BigNumberish;
+  collection: string;
+}
+export interface HandleLinkedEventEmittedResponse {
+  handle: HandleEventEmittedResponse;
+  token: TokenEventEmittedResponse;
+  transactionExecutor: string;
+  timestamp: BigNumberish;
+}
+export interface HandleUnlinkedEventEmittedResponse {
+  handle: HandleEventEmittedResponse;
+  token: TokenEventEmittedResponse;
+  transactionExecutor: string;
+  timestamp: BigNumberish;
+}
+export interface NonceUpdatedEventEmittedResponse {
+  signer: string;
+  nonce: BigNumberish;
+  timestamp: BigNumberish;
+}
 export interface SignatureRequest {
   signer: string;
   v: BigNumberish;
@@ -89,6 +125,17 @@ export interface DiGiTokenHandleRegistry {
    * @param profileId Type: uint256, Indexed: false
    */
   getDefaultHandle(profileId: BigNumberish, overrides?: ContractCallOverrides): Promise<BigNumber>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param increment Type: uint8, Indexed: false
+   */
+  incrementNonce(
+    increment: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
